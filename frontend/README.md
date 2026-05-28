@@ -14,3 +14,27 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+# Study Tutor
+
+AI-powered study tool. Upload your course materials and get a personalized tutor.
+
+## Stack
+- Flask + LangChain backend
+- React frontend
+- ChromaDB vector database
+- Ollama for local LLM inference
+- Docker
+
+## Requirements
+- Docker Desktop
+- Ollama installed with these models pulled:
+  - `ollama pull llama3.2`
+  - `ollama pull nomic-embed-text`
+
+## Run
+```bash
+docker compose up --build
+```
+Frontend: http://localhost:5173
+Backend: http://localhost:5001

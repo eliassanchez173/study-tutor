@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+__pycache__/
+*.pyc
+.env
+progress.db
+node_modules/
+dist/
+chroma_data/
