@@ -1,0 +1,12 @@
+flask
+flask-cors
+langchain
+langchain-ollama
+langchain-community
+langchain-chroma
+langchain-text-splitters
+python-dotenv
+gunicorn
+pypdf
+python-pptx
+chromadb
