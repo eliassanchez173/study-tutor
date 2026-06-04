@@ -10,3 +10,4 @@ gunicorn
 pypdf
 python-pptx
 chromadb
+mcp
