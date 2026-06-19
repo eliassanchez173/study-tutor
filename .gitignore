@@ -1,0 +1,30 @@
+# Environment variables
+.env
+.env.*
+
+# AWS SAM
+.aws-sam/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Python databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Virtual environments
+venv/
+.venv/
+
+# Node
+node_modules/
+dist/
+build/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store

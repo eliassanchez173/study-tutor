@@ -1,0 +1,161 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Study Tutor - Serverless RAG API
+
+Globals:
+  Function:
+    Timeout: 60
+    MemorySize: 512
+    Architectures:
+      - arm64
+    VpcConfig:
+      SecurityGroupIds:
+        - sg-0c83985029800d2db
+      SubnetIds:
+        - subnet-0e5541e2fa00f8d83
+        - subnet-0430861614fc7ef6f
+        - subnet-016ae2635858157aa
+    Environment:
+      Variables:
+        AWS_REGION_NAME: !Sub "${AWS::Region}"
+        DATABASE_URL: !Ref DatabaseUrl
+        DB_PATH: /tmp/progress.db
+
+Parameters:
+  DatabaseUrl:
+    Type: String
+    Description: PostgreSQL connection string for RDS pgvector instance
+
+Resources:
+
+  StudyTutorApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
+
+  ChatFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Policies:
+        - AmazonBedrockFullAccess
+        - AmazonRDSFullAccess
+      Events:
+        ChatPost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref StudyTutorApi
+            Path: /chat
+            Method: post
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./backend
+      DockerTag: chat
+      DockerBuildArgs:
+        HANDLER: lambda_handler.chat
+
+  UploadFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Timeout: 120
+      MemorySize: 1024
+      Policies:
+        - AmazonBedrockFullAccess
+        - AmazonRDSFullAccess
+      Events:
+        UploadPost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref StudyTutorApi
+            Path: /upload
+            Method: post
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./backend
+      DockerTag: upload
+      DockerBuildArgs:
+        HANDLER: lambda_handler.upload
+
+  GenerateQuestionsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Policies:
+        - AmazonBedrockFullAccess
+        - AmazonRDSFullAccess
+      Events:
+        GeneratePost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref StudyTutorApi
+            Path: /generate-questions
+            Method: post
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./backend
+      DockerTag: generate
+      DockerBuildArgs:
+        HANDLER: lambda_handler.generate_questions
+
+  CheckAnswerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Policies:
+        - AmazonBedrockFullAccess
+        - AmazonRDSFullAccess
+      Events:
+        CheckPost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref StudyTutorApi
+            Path: /check-answer
+            Method: post
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./backend
+      DockerTag: check
+      DockerBuildArgs:
+        HANDLER: lambda_handler.check_answer
+
+  SessionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Policies:
+        - AmazonRDSFullAccess
+      Events:
+        SessionPost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref StudyTutorApi
+            Path: /session
+            Method: post
+        SessionsGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref StudyTutorApi
+            Path: /sessions
+            Method: get
+        HistoryGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref StudyTutorApi
+            Path: /session/{session_id}/history
+            Method: get
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./backend
+      DockerTag: session
+      DockerBuildArgs:
+        HANDLER: lambda_handler.session
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub "https://${StudyTutorApi}.execute-api.${AWS::Region}.amazonaws.com/prod"

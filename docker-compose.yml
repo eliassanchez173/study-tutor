@@ -4,10 +4,12 @@ services:
     ports:
       - "5001:5000"
     environment:
-      - CHROMA_HOST=chromadb
-      - CHROMA_PORT=8000
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/studytutor
+      - AWS_REGION=us-east-2
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     depends_on:
-      - chromadb
+      - postgres
     volumes:
       - ./backend:/app
 
@@ -18,12 +20,16 @@ services:
     depends_on:
       - backend
 
-  chromadb:
-    image: chromadb/chroma
+  postgres:
+    image: pgvector/pgvector:pg16
     ports:
-      - "8000:8000"
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: studytutor
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes:
-      - chroma_data:/chroma/chroma
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
-  chroma_data:
+  postgres_data:

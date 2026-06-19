@@ -1,32 +1,24 @@
 import asyncio
 import sqlite3
-import chromadb
-from datetime import datetime
+import os
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp import types
-from langchain_ollama import OllamaEmbeddings
-from langchain_chroma import Chroma
-from chromadb.config import Settings
+from langchain_aws import BedrockEmbeddings
+from langchain_postgres import PGVector
 
-embeddings = OllamaEmbeddings(
-    model="nomic-embed-text",
-    base_url="http://localhost:11434"
+embeddings = BedrockEmbeddings(
+    model_id="amazon.titan-embed-text-v2:0",
+    region_name=os.environ["AWS_REGION"]
 )
 
-chroma_client = chromadb.HttpClient(
-    host="localhost",
-    port=8000,
-    settings=Settings(anonymized_telemetry=False)
-)
-
-vectorstore = Chroma(
+vectorstore = PGVector(
+    embeddings=embeddings,
     collection_name="study_materials",
-    embedding_function=embeddings,
-    client=chroma_client,
+    connection=os.environ["DATABASE_URL"],
 )
 
-DB_PATH = "/Users/sanchez/study-tutor/backend/progress.db"
+DB_PATH = os.environ.get("DB_PATH", "/Users/sanchez/study-tutor/backend/progress.db")
 
 server = Server("study-tutor")
 

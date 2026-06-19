@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from langchain_ollama import ChatOllama, OllamaEmbeddings
-from langchain_chroma import Chroma
+from langchain_aws import ChatBedrock, BedrockEmbeddings
+from langchain_postgres import PGVector
+import boto3
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_community.document_loaders import PyPDFLoader, UnstructuredPowerPointLoader
+from langchain_community.document_loaders import PyPDFLoader, PythonPptxLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
 import tempfile
@@ -11,26 +12,26 @@ import sqlite3
 import re
 from security import sanitize_content, validate_output
 from datetime import datetime
-import chromadb as chromadb_client
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-llm = ChatOllama(
-    model="llama3.2",
-    base_url="http://host.docker.internal:11434"
+llm = ChatBedrock(
+    model_id="us.meta.llama3-1-8b-instruct-v1:0", 
+    region_name=os.environ["AWS_REGION"]
 )
 
-embeddings = OllamaEmbeddings(
-    model="nomic-embed-text",
-    base_url="http://host.docker.internal:11434"
+embeddings = BedrockEmbeddings(
+    model_id="amazon.titan-embed-text-v2:0",
+    region_name=os.environ["AWS_REGION"]
 )
 
-chroma_http = chromadb_client.HttpClient(host="chromadb", port=8000)
-vectorstore = Chroma(
+vectorstore = PGVector(
+    embeddings=embeddings,
     collection_name="study_materials",
-    embedding_function=embeddings,
-    client=chroma_http
+    connection=os.environ["DATABASE_URL"],  # postgres://user:pass@host:5432/dbname
 )
 
 text_splitter = RecursiveCharacterTextSplitter(
@@ -38,7 +39,7 @@ text_splitter = RecursiveCharacterTextSplitter(
     chunk_overlap=200
 )
 
-DB_PATH = "/app/progress.db"
+DB_PATH = os.environ.get("DB_PATH", "/tmp/progress.db")
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -343,4 +344,4 @@ Evaluate the student's answer.""")
     return jsonify({"verdict": verdict, "feedback": feedback})
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5001)

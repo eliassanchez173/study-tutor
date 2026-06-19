@@ -1,13 +1,11 @@
 flask
 flask-cors
-langchain
-langchain-ollama
-langchain-community
-langchain-chroma
+langchain-aws
+langchain-postgres
 langchain-text-splitters
 python-dotenv
-gunicorn
 pypdf
 python-pptx
-chromadb
+psycopg2-binary
 mcp
+langchain-community

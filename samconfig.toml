@@ -1,0 +1,13 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "study-tutor"
+resolve_s3 = true
+s3_prefix = "study-tutor"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "DatabaseUrl=\"postgresql://postgres:B$ia2025!@studytutor-db.clgcwoys8g4o.us-east-2.rds.amazonaws.com:5432/postgres\""
+image_repositories = ["ChatFunction=952933883893.dkr.ecr.us-east-2.amazonaws.com/studytutorf9129c4a/chatfunctiondddd4012repo", "UploadFunction=952933883893.dkr.ecr.us-east-2.amazonaws.com/studytutorf9129c4a/uploadfunctiondd04e321repo", "GenerateQuestionsFunction=952933883893.dkr.ecr.us-east-2.amazonaws.com/studytutorf9129c4a/generatequestionsfunction845987d9repo", "CheckAnswerFunction=952933883893.dkr.ecr.us-east-2.amazonaws.com/studytutorf9129c4a/checkanswerfunction1894805brepo", "SessionFunction=952933883893.dkr.ecr.us-east-2.amazonaws.com/studytutorf9129c4a/sessionfunction8d98bf48repo"]
+
+[default.global.parameters]
+region = "us-east-2"

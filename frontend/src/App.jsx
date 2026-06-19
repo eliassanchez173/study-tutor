@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown"
 import { useDropzone } from "react-dropzone"
 import "./App.css"
 
-const API = "http://localhost:5001"
+const API = "https://bkuhfzodte.execute-api.us-east-2.amazonaws.com/prod"
 
 export default function App() {
   const [messages, setMessages] = useState([])
